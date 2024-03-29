@@ -87,4 +87,4 @@ class ReplayBuffer:
             else:
                 state_slice.append(self.states[current])
 
-        return state_slice
+        return np.concatenate(state_slice, axis=-1)
