@@ -1,8 +1,8 @@
-from src.models.model import get_model_static_frame
+from src.models.model import get_model_basic_cnn
 
 
-def get_model(model_type, input_shape, num_classes, seed):
-    if model_type == 'static_frame':
-        return get_model_static_frame(input_shape, num_classes, seed)
+def get_model(model_type, num_classes, seed, input_shape):
+    if model_type == 'basic_cnn':
+        return get_model_basic_cnn(num_classes, seed, input_shape)
     else:
         raise Exception("Model not implemented")
