@@ -1,0 +1,23 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+gymnasium = {extras = ["atari", "accept-rom-license"], version = "*"}
+numpy = "*"
+pandas = "*"
+matplotlib = "*"
+tensorflow = "*"
+jupyter = "*"
+ale-py = "*"
+opencv-python = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.11"
+python_full_version = "3.11.7"
+
+[scripts]
+src = "cd src"
