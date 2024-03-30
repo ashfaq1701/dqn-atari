@@ -11,7 +11,7 @@ FRAME_SHAPE = (84, 84)
 
 def train_dqn(
         env_name,
-        n_episodes=400,
+        n_episodes=1000,
         n_steps=3000,
         discount_factor=0.95,
         learning_rate=1e-4,

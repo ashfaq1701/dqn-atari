@@ -30,17 +30,27 @@ def play_one_episode(episode_idx, env, model, n_steps, n_outputs, replay_buffer,
 
     epsilon = max(1 - episode_idx / 500, 0.01)
     episode_rewards = []
+    max_step = 0
 
     for step in range(n_steps):
-        reward, done, truncated, info = play_one_step(env, state_queue, model, n_outputs, replay_buffer, epsilon)
+        reward, done, truncated, info = play_one_step(
+            env,
+            state_queue,
+            model,
+            n_outputs,
+            replay_buffer,
+            epsilon,
+            frame_shape
+        )
 
+        max_step = step
         episode_rewards.append(reward)
 
         if done or truncated:
             break
 
     total_rewards = sum(episode_rewards)
-    print(f"\rEpisode: {episode_idx + 1}, Steps: {n_steps + 1}, eps: {epsilon:.3f}, total rewards: {total_rewards}", end="")
+    print(f"\rEpisode: {episode_idx + 1}, Steps: {max_step + 1}, eps: {epsilon:.3f}, total rewards: {total_rewards}")
     return total_rewards
 
 
@@ -67,7 +77,7 @@ def play_multiple_episodes(
     best_weights = model.get_weights()
 
     for episode in range(n_episodes):
-        episode_reward, furthest_step = play_one_episode(
+        episode_reward = play_one_episode(
             episode_idx=episode,
             env=env,
             model=model,
@@ -75,7 +85,9 @@ def play_multiple_episodes(
             n_outputs=n_outputs,
             replay_buffer=replay_buffer,
             history_len=history_len,
-            frame_shape=frame_shape)
+            frame_shape=frame_shape
+        )
+        replay_buffer.end_episode()
 
         rewards_over_episodes.append(episode_reward)
         if episode_reward >= max_reward:
@@ -89,7 +101,8 @@ def play_multiple_episodes(
                 optimizer=optimizer,
                 loss_fn=loss_fn,
                 replay_buffer=replay_buffer,
-                n_outputs=n_outputs)
+                n_outputs=n_outputs
+            )
 
         model.set_weights(best_weights)
 

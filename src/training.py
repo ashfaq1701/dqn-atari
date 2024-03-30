@@ -1,10 +1,14 @@
+import numpy as np
 import tensorflow as tf
 
 
 def training_step(model, discount_factor, optimizer, loss_fn, replay_buffer, n_outputs):
     experiences = replay_buffer.sample_experiences()
     states, actions, rewards, next_states, dones, truncateds = experiences
+
+    next_states = [np.expand_dims(state, axis=0) for state in next_states]
     next_Q_values = model.predict(next_states, verbose=0)
+
     max_next_Q_values = next_Q_values.max(axis=1)
     runs = 1.0 - (dones | truncateds)
     target_Q_values = rewards + runs * discount_factor * max_next_Q_values

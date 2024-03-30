@@ -5,7 +5,7 @@ def find_first_greater_index(arr, value):
     for i, element in enumerate(arr):
         if element > value:
             return i
-    return -1
+    return len(arr)
 
 
 class ReplayBuffer:
@@ -39,6 +39,7 @@ class ReplayBuffer:
         left_bound, right_bound = self._get_episode_sample_boundaries(idx)
         state_history = self._get_slice(sample_idx - self.history_len, sample_idx - 1, left_bound, right_bound)
         next_state_history = self._get_slice(sample_idx - self.history_len + 1, sample_idx, left_bound, right_bound)
+
         return (
             state_history,
             self.actions[idx],
@@ -51,7 +52,7 @@ class ReplayBuffer:
     def sample_experiences(self):
         indices = np.random.choice(range(len(self.actions)), size=self.batch_size)
         experiences = [self._get_experience(idx) for idx in indices]
-        return zip(*experiences)
+        return [np.array(item) for item in zip(*experiences)]
 
     def end_episode(self):
         self.episode_runs.append(len(self.actions))
@@ -71,8 +72,12 @@ class ReplayBuffer:
 
     def _get_episode_sample_boundaries(self, idx):
         episode_idx = find_first_greater_index(self.episode_runs, idx)
+
         left_bound = (self.episode_runs[episode_idx - 1] if episode_idx > 0 else 0) + episode_idx
-        right_bound = self.episode_runs[episode_idx] + episode_idx + 1
+        right_bound = self.episode_runs[episode_idx] + episode_idx + 1 \
+            if episode_idx < len(self.episode_runs) \
+            else len(self.states) - 1
+
         return left_bound, right_bound
 
     def _get_slice(self, start, end, left_bound, right_bound):
