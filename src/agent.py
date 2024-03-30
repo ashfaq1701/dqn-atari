@@ -55,11 +55,9 @@ def play_multiple_episodes(
         batch_size,
         optimizer,
         loss_fn,
-        replay_buffer_len,
         frame_shape):
 
     replay_buffer = ReplayBuffer(
-        size=replay_buffer_len,
         history_len=history_len,
         batch_size=batch_size,
         sample_dim=frame_shape

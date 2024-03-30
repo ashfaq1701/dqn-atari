@@ -9,8 +9,7 @@ def find_first_greater_index(arr, value):
 
 
 class ReplayBuffer:
-    def __init__(self, size, history_len=4, batch_size=32, sample_dim=(84, 84)):
-        self.size = size
+    def __init__(self, history_len=4, batch_size=32, sample_dim=(84, 84)):
         self.history_len = history_len
         self.batch_size = batch_size
         self.sample_dim = sample_dim

@@ -8,10 +8,11 @@ gymnasium = {extras = ["atari", "accept-rom-license"], version = "*"}
 numpy = "*"
 pandas = "*"
 matplotlib = "*"
-tensorflow = "*"
 jupyter = "*"
 ale-py = "*"
 opencv-python = "*"
+tensorflow-macos = "*"
+tensorflow-metal = "*"
 
 [dev-packages]
 

@@ -14,7 +14,7 @@ class MaxSizedQueue:
     def get_history(self):
         if len(self.queue) == 0:
             # If queue is empty, return array filled with zeros
-            return np.zeros((*self.element_shape, self.history_len))
+            return np.zeros((*self.element_shape, self.history_len), dtype=np.float32)
         elif len(self.queue) < self.history_len:
             # If queue has fewer elements than history_len
             num_missing = self.history_len - len(self.queue)
