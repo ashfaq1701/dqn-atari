@@ -21,14 +21,13 @@ def play_one_step(env, state_queue, model, n_outputs, replay_buffer, epsilon, fr
     return reward, done, truncated, info
 
 
-def play_one_episode(episode_idx, env, model, n_steps, n_outputs, replay_buffer, history_len, frame_shape):
+def play_one_episode(episode_idx, env, model, n_steps, n_outputs, epsilon, replay_buffer, history_len, frame_shape):
     obs, info = env.reset()
 
     state_queue = MaxSizedQueue(history_len=history_len)
     preprocessed_obs = frame_processor(obs, shape=frame_shape)
     state_queue.enqueue(preprocessed_obs)
 
-    epsilon = max(1 - episode_idx / 500, 0.01)
     episode_rewards = []
     max_step = 0
 
@@ -51,7 +50,7 @@ def play_one_episode(episode_idx, env, model, n_steps, n_outputs, replay_buffer,
 
     total_rewards = sum(episode_rewards)
     print(f"\rEpisode: {episode_idx + 1}, Steps: {max_step + 1}, eps: {epsilon:.3f}, total rewards: {total_rewards}")
-    return total_rewards
+    return total_rewards, max_step
 
 
 def play_multiple_episodes(
@@ -74,16 +73,20 @@ def play_multiple_episodes(
         sample_dim=frame_shape
     )
     rewards_over_episodes = []
+    steps_over_episodes = []
     max_reward = float('-inf')
     best_weights = model.get_weights()
 
     for episode in range(n_episodes):
-        episode_reward = play_one_episode(
+        epsilon = max(1 - episode / n_episodes, 0.01)
+
+        episode_reward, max_step_of_episode = play_one_episode(
             episode_idx=episode,
             env=env,
             model=model,
             n_steps=n_steps,
             n_outputs=n_outputs,
+            epsilon=epsilon,
             replay_buffer=replay_buffer,
             history_len=history_len,
             frame_shape=frame_shape
@@ -91,6 +94,8 @@ def play_multiple_episodes(
         replay_buffer.end_episode()
 
         rewards_over_episodes.append(episode_reward)
+        steps_over_episodes.append(max_step_of_episode)
+
         if episode_reward >= max_reward:
             best_weights = model.get_weights()
             max_reward = episode_reward
@@ -110,4 +115,4 @@ def play_multiple_episodes(
                 target_model.set_weights(model.get_weights())
 
     model.set_weights(best_weights)
-    return rewards_over_episodes
+    return rewards_over_episodes, steps_over_episodes
