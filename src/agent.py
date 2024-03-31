@@ -78,7 +78,7 @@ def play_multiple_episodes(
     best_weights = model.get_weights()
 
     for episode in range(n_episodes):
-        epsilon = max(1 - episode / n_episodes, 0.01)
+        epsilon = max(1 - episode / int(0.7 * n_episodes), 0.01)
 
         episode_reward, max_step_of_episode = play_one_episode(
             episode_idx=episode,
@@ -100,7 +100,7 @@ def play_multiple_episodes(
             best_weights = model.get_weights()
             max_reward = episode_reward
 
-        if episode > 50:
+        if episode >= 50:
             training_step(
                 model=model,
                 target_model=target_model,
