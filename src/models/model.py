@@ -12,11 +12,14 @@ def get_model_duelling_dqn(num_classes, seed, input_shape):
     x = tf.keras.layers.Dense(units=512, activation="relu")(x)
 
     state_values = tf.keras.layers.Dense(units=1)(x)
-    raw_advantages = tf.keras.layers.Dense(units=num_classes)(x)
+    raw_advantages = tf.keras.layers.Dense(num_classes)(x)
 
-    advantages = raw_advantages - tf.reduce_max(raw_advantages, axis=1, keepdims=True)
+    advantages = tf.keras.layers.Lambda(
+        lambda adv: adv - tf.reduce_max(adv, axis=1, keepdims=True),
+        output_shape=lambda shape: shape
+    )(raw_advantages)
 
-    Q_values = state_values + advantages
+    Q_values = tf.keras.layers.Add()([state_values, advantages])
 
     model = tf.keras.Model(inputs=[inputs], outputs=[Q_values])
 
