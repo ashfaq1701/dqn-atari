@@ -22,11 +22,14 @@ def train_dqn(
     loss_fn = tf.keras.losses.mean_squared_error
     optimizer = tf.keras.optimizers.Nadam(learning_rate=learning_rate)
 
-    model = get_model('basic_cnn', action_count, model_seed, (*FRAME_SHAPE, HISTORY_LEN))
+    model = get_model('dueling_dqn', action_count, model_seed, (*FRAME_SHAPE, HISTORY_LEN))
+    target_model = tf.keras.models.clone_model(model)
+    target_model.set_weights(model.get_weights())
 
     rewards_per_episode = play_multiple_episodes(
         env=env,
         model=model,
+        target_model=model,
         n_episodes=n_episodes,
         n_steps=n_steps,
         n_outputs=action_count,

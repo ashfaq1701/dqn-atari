@@ -57,6 +57,7 @@ def play_one_episode(episode_idx, env, model, n_steps, n_outputs, replay_buffer,
 def play_multiple_episodes(
         env,
         model,
+        target_model,
         n_episodes,
         n_steps,
         n_outputs,
@@ -97,6 +98,7 @@ def play_multiple_episodes(
         if episode > 50:
             training_step(
                 model=model,
+                target_model=target_model,
                 discount_factor=discount_factor,
                 optimizer=optimizer,
                 loss_fn=loss_fn,
@@ -104,6 +106,8 @@ def play_multiple_episodes(
                 n_outputs=n_outputs
             )
 
-        model.set_weights(best_weights)
+            if episode % 50 == 0:
+                target_model.set_weights(model.get_weights())
 
+    model.set_weights(best_weights)
     return rewards_over_episodes

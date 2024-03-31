@@ -1,16 +1,23 @@
 import tensorflow as tf
 
 
-def get_model_basic_cnn(num_classes, seed, input_shape):
+def get_model_duelling_dqn(num_classes, seed, input_shape):
     tf.random.set_seed(seed)
 
-    model = tf.keras.Sequential([
-        tf.keras.layers.Input(shape=input_shape),
-        tf.keras.layers.Conv2D(filters=16, kernel_size=8, strides=4, activation="relu"),
-        tf.keras.layers.Conv2D(filters=32, kernel_size=4, strides=2, activation="relu"),
-        tf.keras.layers.Flatten(),
-        tf.keras.layers.Dense(units=256, activation="relu"),
-        tf.keras.layers.Dense(units=num_classes, activation="softmax")
-    ])
+    inputs = tf.keras.layers.Input(shape=input_shape)
+    x = tf.keras.layers.Conv2D(filters=32, kernel_size=8, strides=4, activation="relu")(inputs)
+    x = tf.keras.layers.Conv2D(filters=64, kernel_size=4, strides=2, activation="relu")(x)
+    x = tf.keras.layers.Conv2D(filters=64, kernel_size=3, strides=1, activation="relu")(x)
+    x = tf.keras.layers.Flatten()(x)
+    x = tf.keras.layers.Dense(units=512, activation="relu")(x)
+
+    state_values = tf.keras.layers.Dense(units=1)(x)
+    raw_advantages = tf.keras.layers.Dense(units=num_classes)(x)
+
+    advantages = raw_advantages - tf.reduce_max(raw_advantages, axis=1, keepdims=True)
+
+    Q_values = state_values + advantages
+
+    model = tf.keras.Model(inputs=[inputs], outputs=[Q_values])
 
     return model
