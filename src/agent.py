@@ -74,7 +74,7 @@ def play_multiple_episodes(
         sample_dim=frame_shape
     )
     rewards_over_episodes = []
-    max_reward = 0
+    max_reward = float('-inf')
     best_weights = model.get_weights()
 
     for episode in range(n_episodes):
