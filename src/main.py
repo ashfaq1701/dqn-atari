@@ -28,7 +28,7 @@ def train_dqn(
     target_model = tf.keras.models.clone_model(model)
     target_model.set_weights(model.get_weights())
 
-    rewards_per_episode, steps_over_episode = play_multiple_episodes(
+    rewards_per_episode, steps_over_episode, q_values_over_episode = play_multiple_episodes(
         env=env,
         model=model,
         target_model=model,
@@ -43,4 +43,4 @@ def train_dqn(
         frame_shape=FRAME_SHAPE
     )
 
-    return rewards_per_episode, steps_over_episode, model
+    return rewards_per_episode, steps_over_episode, q_values_over_episode, model

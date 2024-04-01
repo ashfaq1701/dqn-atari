@@ -76,9 +76,10 @@ def play_multiple_episodes(
     steps_over_episodes = []
     max_reward = float('-inf')
     best_weights = model.get_weights()
+    avg_max_q_values = []
 
     for episode in range(n_episodes):
-        epsilon = max(1 - episode / int(0.7 * n_episodes), 0.01)
+        epsilon = max(1 - episode / int(0.9 * n_episodes), 0.01)
 
         episode_reward, max_step_of_episode = play_one_episode(
             episode_idx=episode,
@@ -100,8 +101,9 @@ def play_multiple_episodes(
             best_weights = model.get_weights()
             max_reward = episode_reward
 
+        avg_max_q_value = 0
         if episode >= 50:
-            training_step(
+            avg_max_q_value = training_step(
                 model=model,
                 target_model=target_model,
                 discount_factor=discount_factor,
@@ -114,5 +116,7 @@ def play_multiple_episodes(
             if episode % 50 == 0:
                 target_model.set_weights(model.get_weights())
 
+        avg_max_q_values.append(avg_max_q_value)
+
     model.set_weights(best_weights)
-    return rewards_over_episodes, steps_over_episodes
+    return rewards_over_episodes, steps_over_episodes, avg_max_q_values
