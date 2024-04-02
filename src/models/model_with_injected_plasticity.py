@@ -2,13 +2,12 @@ import tensorflow as tf
 
 
 class PlasticityInjectedNet(tf.keras.Model):
-    def __init__(self, encoder, head, rule, eta, alpha):
+    def __init__(self, encoder, head, eta, alpha):
         super(PlasticityInjectedNet, self).__init__()
         self.encoder = encoder
         self.head = head
         self.head_frozen = None
         self.head_trainable = None
-        self.rule = rule
         self.eta = eta
         self.alpha = alpha
 
@@ -31,7 +30,7 @@ class PlasticityInjectedNet(tf.keras.Model):
         self.head.trainable = False
 
 
-def get_model_injected_plasticity(num_classes, seed, input_shape, rule='hebb', eta=0.01, alpha=0.1):
+def get_model_injected_plasticity(num_classes, seed, input_shape, eta, alpha):
     tf.random.set_seed(seed)
 
     inputs = tf.keras.layers.Input(shape=input_shape)
@@ -55,6 +54,6 @@ def get_model_injected_plasticity(num_classes, seed, input_shape, rule='hebb', e
 
     head = tf.keras.Model(inputs=[x], outputs=[Q_values])
 
-    model = PlasticityInjectedNet(encoder, head, rule, eta, alpha)
+    model = PlasticityInjectedNet(encoder, head, eta, alpha)
 
     return model
