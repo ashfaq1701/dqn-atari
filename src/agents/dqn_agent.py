@@ -32,7 +32,7 @@ def play_multiple_episodes_dqn(
     avg_max_q_values = []
 
     for episode in range(n_episodes):
-        epsilon = max(1 - episode / int(0.9 * n_episodes), 0.01)
+        epsilon = max(1 - episode / int(0.8 * n_episodes), 0.01)
 
         episode_reward, max_step_of_episode = play_one_episode(
             episode_idx=episode,
