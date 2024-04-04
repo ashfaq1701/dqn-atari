@@ -2,8 +2,7 @@ import numpy as np
 import tensorflow as tf
 
 
-def training_step(model, target_model, discount_factor, optimizer, loss_fn, replay_buffer, n_outputs):
-    experiences = replay_buffer.sample_experiences()
+def training_step(model, target_model, experiences, discount_factor, optimizer, loss_fn, n_outputs):
     states, actions, rewards, next_states, dones, truncateds = experiences
 
     next_Q_values = model.predict(next_states, verbose=0)

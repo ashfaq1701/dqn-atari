@@ -15,7 +15,6 @@ def play_multiple_episodes_dqn_plastic(
         loss_fn,
         frame_shape
 ):
-    model.inject_plasticity()
     rewards_over_episodes, steps_over_episodes, avg_max_q_values = play_multiple_episodes_dqn(
         env,
         model,
@@ -30,6 +29,8 @@ def play_multiple_episodes_dqn_plastic(
         loss_fn,
         frame_shape
     )
+
+    model.inject_plasticity()
 
     rewards_over_episodes, steps_over_episodes, avg_max_q_values = play_multiple_episodes_dqn_inject_plasticity(
         env,

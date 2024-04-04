@@ -86,6 +86,12 @@ class DQNInjectedPlasticityModel(tf.keras.Model):
     def inject_plasticity(self):
         self.is_plasticity_injected = True
 
+        self.conv1.trainable = False
+        self.conv2.trainable = False
+        self.conv3.trainable = False
+        self.flatten.trainable = False
+        self.dense1.trainable = False
+
         self.raw_advantages.trainable = False
         self.state_values.trainable = False
 

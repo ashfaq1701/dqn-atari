@@ -56,13 +56,14 @@ def play_multiple_episodes_dqn(
 
         avg_max_q_value = 0
         if episode >= 50:
+            experiences = replay_buffer.sample_experiences()
             avg_max_q_value = training_step(
                 model=model,
                 target_model=target_model,
+                experiences=experiences,
                 discount_factor=discount_factor,
                 optimizer=optimizer,
                 loss_fn=loss_fn,
-                replay_buffer=replay_buffer,
                 n_outputs=n_outputs
             )
 
