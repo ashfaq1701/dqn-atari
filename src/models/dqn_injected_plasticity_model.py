@@ -1,7 +1,5 @@
 import tensorflow as tf
 
-from src.models.layers.max_norm import MaxNorm
-
 
 @tf.keras.utils.register_keras_serializable(package="src.models")
 class DQNInjectedPlasticityModel(tf.keras.Model):
@@ -29,12 +27,12 @@ class DQNInjectedPlasticityModel(tf.keras.Model):
         self.is_plasticity_injected = is_plasticity_injected
 
         if hebb is None:
-            self.hebb = tf.constant(0.0, shape=(512, num_classes + 1))
+            self.hebb = tf.Variable(tf.zeros(shape=(512, num_classes + 1)), trainable=False)
         else:
             self.hebb = hebb
 
-        self.hebb_adv = tf.identity(self.hebb[:, :num_classes])
-        self.hebb_states = tf.identity(self.hebb[:, num_classes:])
+        self.hebb_adv = tf.Variable(self.hebb[:, :num_classes], trainable=False)
+        self.hebb_states = tf.Variable(self.hebb[:, num_classes:], trainable=False)
 
         self.conv1 = tf.keras.layers.Conv2D(
             filters=32,
@@ -50,7 +48,10 @@ class DQNInjectedPlasticityModel(tf.keras.Model):
 
         self.state_values = tf.keras.layers.Dense(units=1)
         self.raw_advantages = tf.keras.layers.Dense(num_classes)
-        self.advantages = MaxNorm()
+        self.advantages = tf.keras.layers.Lambda(
+            lambda adv: adv - tf.reduce_max(adv, axis=1, keepdims=True),
+            output_shape=lambda shape: shape
+        )
         self.q_values = tf.keras.layers.Add()
 
         if self.is_plasticity_injected:
@@ -70,8 +71,12 @@ class DQNInjectedPlasticityModel(tf.keras.Model):
             state_values = self.state_values(x) + self.alpha * tf.matmul(x, self.hebb_states)
             raw_advantages = self.raw_advantages(x) + self.alpha * tf.matmul(x, self.hebb_adv)
 
-            self.hebb_states = self.eta * tf.transpose(tf.matmul(state_values, x)) + (1 - self.eta) * self.hebb_states
-            self.hebb_adv = self.eta * tf.transpose(tf.matmul(raw_advantages, x)) + (1 - self.eta) * self.hebb_adv
+            self.hebb_states.assign(
+                tf.matmul(tf.transpose(x), state_values) * self.eta + self.hebb_states * (1 - self.eta)
+            )
+            self.hebb_adv.assign(
+                tf.matmul(tf.transpose(x), raw_advantages) * self.eta + self.hebb_adv * (1 - self.eta)
+            )
 
         advantages = self.advantages(raw_advantages)
         q_values = self.q_values([state_values, advantages])
@@ -108,4 +113,3 @@ class DQNInjectedPlasticityModel(tf.keras.Model):
             is_plasticity_injected=config['is_plasticity_injected'],
             hebb=tf.constant(config['hebb']) if config['hebb'] is not None else None
         )
-
