@@ -33,35 +33,33 @@ def plot_q(q_values, title='Avg Max Q Values', xlabel='Timestep', ylabel='Q Valu
     plt.show()
 
 
-def plot_all_rewards(spaceinvaders_rewards, breakout_rewards, pong_rewards, seaquest_rewards):
+def plot_all_rewards(spaceinvaders_rewards, breakout_rewards, pong_rewards, seaquest_rewards, method):
     n_episodes = len(seaquest_rewards)
     x = range(1, n_episodes + 1)
-
-    # Assuming seaquest_rewards, pong_rewards, breakout_rewards, and spaceinvaders_rewards are defined
 
     fig, axs = plt.subplots(2, 2, figsize=(10, 8))  # Create a 2x2 grid plot
 
     # Plot SpaceInvaders Rewards
     axs[0, 0].plot(x, spaceinvaders_rewards)
-    axs[0, 0].set_title('SpaceInvaders Rewards')
+    axs[0, 0].set_title(f"SpaceInvaders Rewards ({method})")
     axs[0, 0].set_xlabel('Episode')
     axs[0, 0].set_ylabel('Total Rewards')
 
     # Plot Breakout Rewards
     axs[0, 1].plot(x, breakout_rewards)
-    axs[0, 1].set_title('Breakout Rewards')
+    axs[0, 1].set_title(f"Breakout Rewards ({method})")
     axs[0, 1].set_xlabel('Episode')
     axs[0, 1].set_ylabel('Total Rewards')
 
     # Plot Pong Rewards
     axs[1, 0].plot(x, pong_rewards)
-    axs[1, 0].set_title('Pong Rewards')
+    axs[1, 0].set_title(f"Pong Rewards({method})")
     axs[1, 0].set_xlabel('Episode')
     axs[1, 0].set_ylabel('Total Rewards')
 
     # Plot SeaQuest Rewards
     axs[1, 1].plot(x, seaquest_rewards)
-    axs[1, 1].set_title('SeaQuest Rewards')
+    axs[1, 1].set_title(f"SeaQuest Rewards ({method})")
     axs[1, 1].set_xlabel('Episode')
     axs[1, 1].set_ylabel('Total Rewards')
 

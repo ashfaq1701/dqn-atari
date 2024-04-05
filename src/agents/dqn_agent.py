@@ -19,11 +19,12 @@ def play_multiple_episodes_dqn(
         batch_size,
         optimizer,
         loss_fn,
-        frame_shape):
+        frame_shape,
+        replay_buff_max_len):
     replay_buffer = ReplayBuffer(
         history_len=history_len,
         batch_size=batch_size,
-        sample_dim=frame_shape
+        maxlen=replay_buff_max_len
     )
     rewards_over_episodes = []
     steps_over_episodes = []
@@ -32,7 +33,7 @@ def play_multiple_episodes_dqn(
     avg_max_q_values = []
 
     for episode in range(n_episodes):
-        epsilon = max(1 - episode / int(0.8 * n_episodes), 0.01)
+        epsilon = max(1 - episode / n_episodes, 0.01)
 
         episode_reward, max_step_of_episode = play_one_episode(
             episode_idx=episode,
@@ -45,7 +46,6 @@ def play_multiple_episodes_dqn(
             history_len=history_len,
             frame_shape=frame_shape
         )
-        replay_buffer.end_episode()
 
         rewards_over_episodes.append(episode_reward)
         steps_over_episodes.append(max_step_of_episode)
@@ -76,7 +76,7 @@ def play_multiple_episodes_dqn(
     return rewards_over_episodes, steps_over_episodes, avg_max_q_values
 
 
-def play_one_step(env, state_queue, model, n_outputs, replay_buffer, epsilon, frame_shape):
+def play_one_step(env, state_queue, model, n_outputs, replay_buffer, step_idx, epsilon, frame_shape):
     state_history = state_queue.get_history()
     action = epsilon_greedy_policy(state_history, model, n_outputs, epsilon)
     next_state, reward, done, truncated, info = env.step(action)
@@ -84,7 +84,10 @@ def play_one_step(env, state_queue, model, n_outputs, replay_buffer, epsilon, fr
     last_state = state_history[:, :, -1][..., np.newaxis]
 
     preprocessed_next_state = frame_processor(next_state, shape=frame_shape)
-    replay_buffer.add_experience((last_state, action, reward, preprocessed_next_state, done, truncated))
+    replay_buffer.add_experience(
+        (last_state, action, reward, preprocessed_next_state, done, truncated),
+        step_idx == 0
+    )
     state_queue.enqueue(preprocessed_next_state)
 
     return reward, done, truncated, info
@@ -107,6 +110,7 @@ def play_one_episode(episode_idx, env, model, n_steps, n_outputs, epsilon, repla
             model,
             n_outputs,
             replay_buffer,
+            step,
             epsilon,
             frame_shape
         )

@@ -14,12 +14,13 @@ FRAME_SHAPE = (84, 84)
 def train_dqn(
         env_name,
         method,
-        n_episodes=100_000,
+        n_episodes=20_000,
         n_steps=3000,
         discount_factor=0.95,
         learning_rate=1e-4,
         model_seed=42,
         env_seed=None,
+        replay_buff_max_len=100_000,
         eta=0.01,
         alpha=0.1):
     env, _, _, action_count = create_env(env_name, env_seed)
@@ -66,7 +67,8 @@ def train_dqn(
             batch_size=BATCH_SIZE,
             optimizer=optimizer,
             loss_fn=loss_fn,
-            frame_shape=FRAME_SHAPE
+            frame_shape=FRAME_SHAPE,
+            replay_buff_max_len=replay_buff_max_len
         )
     elif method == 'dqn_injected_plasticity':
         rewards_per_episode, steps_over_episode, q_values_over_episode = play_multiple_episodes_dqn_plastic(
@@ -81,7 +83,8 @@ def train_dqn(
             batch_size=BATCH_SIZE,
             optimizer=optimizer,
             loss_fn=loss_fn,
-            frame_shape=FRAME_SHAPE
+            frame_shape=FRAME_SHAPE,
+            replay_buff_max_len=replay_buff_max_len
         )
     else:
         raise Exception("Unknown method: {}".format(method))

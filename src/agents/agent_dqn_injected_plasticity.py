@@ -13,7 +13,8 @@ def play_multiple_episodes_dqn_plastic(
         batch_size,
         optimizer,
         loss_fn,
-        frame_shape
+        frame_shape,
+        replay_buff_max_len
 ):
     rewards_over_episodes, steps_over_episodes, avg_max_q_values = play_multiple_episodes_dqn(
         env,
@@ -27,7 +28,8 @@ def play_multiple_episodes_dqn_plastic(
         batch_size,
         optimizer,
         loss_fn,
-        frame_shape
+        frame_shape,
+        replay_buff_max_len
     )
 
     model.inject_plasticity()
