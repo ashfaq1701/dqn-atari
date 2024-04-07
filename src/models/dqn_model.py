@@ -10,6 +10,7 @@ def get_model_duelling_dqn(num_classes, seed, input_shape):
     x = tf.keras.layers.Conv2D(filters=64, kernel_size=3, strides=1, activation="relu")(x)
     x = tf.keras.layers.Flatten()(x)
     x = tf.keras.layers.Dense(units=512, activation="relu")(x)
+    x = tf.keras.layers.Dense(units=256, activation="relu")(x)
 
     state_values = tf.keras.layers.Dense(units=1)(x)
     raw_advantages = tf.keras.layers.Dense(num_classes)(x)
