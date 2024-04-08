@@ -5,6 +5,7 @@ import tensorflow as tf
 def training_step(model, target_model, experiences, discount_factor, optimizer, loss_fn, n_outputs):
     states, actions, rewards, next_states, dones, truncateds = experiences
 
+
     next_Q_values = model.predict(next_states, verbose=0)
     best_next_actions = next_Q_values.argmax(axis=1)
     next_mask = tf.one_hot(best_next_actions, n_outputs).numpy()
@@ -22,5 +23,8 @@ def training_step(model, target_model, experiences, discount_factor, optimizer, 
         loss = tf.reduce_mean(loss_fn(target_Q_values, Q_values))
 
     grads = tape.gradient(loss, model.trainable_variables)
-    optimizer.apply_gradients(zip(grads, model.trainable_variables))
+
+    if grads is not None and len(grads) > 0 and len(grads) == len(model.trainable_variables):
+        optimizer.apply_gradients(zip(grads, model.trainable_variables))
+
     return avg_max_q_value

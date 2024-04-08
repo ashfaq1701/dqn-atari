@@ -14,13 +14,14 @@ FRAME_SHAPE = (84, 84)
 def train_dqn(
         env_name,
         method,
-        n_episodes=20_000,
+        n_episodes=5000,
         n_steps=3000,
         discount_factor=0.95,
         learning_rate=1e-4,
         model_seed=42,
         env_seed=None,
         replay_buff_max_len=100_000,
+        initial_training_percentage=0.6,
         eta=0.01,
         alpha=0.1):
     env, _, _, action_count = create_env(env_name, env_seed)
@@ -39,9 +40,18 @@ def train_dqn(
             None,
             None
         )
-    elif method == 'dqn_injected_plasticity':
+    elif method == 'ddqn':
         model = get_model(
-            'dqn_injected_plasticity',
+            'ddqn',
+            action_count,
+            model_seed,
+            (*FRAME_SHAPE, HISTORY_LEN),
+            None,
+            None
+        )
+    elif method == 'ddqn_injected_plasticity':
+        model = get_model(
+            'ddqn_injected_plasticity',
             action_count,
             model_seed,
             (*FRAME_SHAPE, HISTORY_LEN),
@@ -54,7 +64,7 @@ def train_dqn(
     target_model = tf.keras.models.clone_model(model)
     target_model.set_weights(model.get_weights())
 
-    if method == 'dqn':
+    if method == 'dqn' or method == 'ddqn':
         rewards_per_episode, steps_over_episode, q_values_over_episode = play_multiple_episodes_dqn(
             env=env,
             model=model,
@@ -70,7 +80,7 @@ def train_dqn(
             frame_shape=FRAME_SHAPE,
             replay_buff_max_len=replay_buff_max_len
         )
-    elif method == 'dqn_injected_plasticity':
+    elif method == 'ddqn_injected_plasticity':
         rewards_per_episode, steps_over_episode, q_values_over_episode = play_multiple_episodes_dqn_plastic(
             env=env,
             model=model,
@@ -84,6 +94,7 @@ def train_dqn(
             optimizer=optimizer,
             loss_fn=loss_fn,
             frame_shape=FRAME_SHAPE,
+            initial_training_percentage=initial_training_percentage,
             replay_buff_max_len=replay_buff_max_len
         )
     else:
