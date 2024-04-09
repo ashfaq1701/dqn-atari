@@ -9,7 +9,7 @@ from src.preprocess import frame_processor
 
 
 def simulate_playing_game(model_path, env_name, env_seed=None, history_len=4, max_steps=10_000, frame_shape=(84, 84)):
-    model = tf.keras.models.load_model(model_path)
+    model = tf.keras.models.load_model(model_path, custom_objects={'tf': tf})
 
     env, _, _, action_count = create_env(env_name, env_seed)
     obs, info = env.reset()

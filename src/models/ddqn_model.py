@@ -1,4 +1,5 @@
 import tensorflow as tf
+from src.models.layers.max_norm import MaxNorm
 
 
 def get_model_duelling_dqn(num_classes, seed, input_shape):
@@ -14,10 +15,7 @@ def get_model_duelling_dqn(num_classes, seed, input_shape):
     state_values = tf.keras.layers.Dense(units=1)(x)
     raw_advantages = tf.keras.layers.Dense(num_classes)(x)
 
-    advantages = tf.keras.layers.Lambda(
-        lambda adv: adv - tf.reduce_max(adv, axis=1, keepdims=True),
-        output_shape=lambda shape: shape
-    )(raw_advantages)
+    advantages = MaxNorm()(raw_advantages)
 
     Q_values = state_values + advantages
 

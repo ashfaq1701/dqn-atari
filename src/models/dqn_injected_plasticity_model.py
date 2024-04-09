@@ -1,4 +1,5 @@
 import tensorflow as tf
+from src.models.layers.max_norm import MaxNorm
 
 
 @tf.keras.utils.register_keras_serializable(package="src.models")
@@ -48,10 +49,7 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
 
         self.state_values = tf.keras.layers.Dense(units=1)
         self.raw_advantages = tf.keras.layers.Dense(num_classes)
-        self.advantages = tf.keras.layers.Lambda(
-            lambda adv: adv - tf.reduce_max(adv, axis=1, keepdims=True),
-            output_shape=lambda shape: shape
-        )
+        self.advantages = MaxNorm()
         self.q_values = tf.keras.layers.Add()
 
         if self.is_plasticity_injected:
