@@ -14,16 +14,16 @@ FRAME_SHAPE = (84, 84)
 def train_dqn(
         env_name,
         method,
-        n_episodes=5000,
+        n_episodes=5_000,
         n_steps=3000,
         discount_factor=0.95,
         learning_rate=1e-4,
         model_seed=42,
         env_seed=None,
         replay_buff_max_len=100_000,
-        initial_training_percentage=0.6,
-        eta=0.01,
-        alpha=0.1):
+        initial_training_percentage=0.7,
+        eta=0.3,
+        alpha=0.3):
     env, _, _, action_count = create_env(env_name, env_seed)
 
     loss_fn = tf.keras.losses.mean_squared_error

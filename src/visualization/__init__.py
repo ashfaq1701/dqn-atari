@@ -33,7 +33,7 @@ def plot_q(q_values, title='Avg Max Q Values', xlabel='Timestep', ylabel='Q Valu
     plt.show()
 
 
-def plot_all_rewards(spaceinvaders_rewards, breakout_rewards, pong_rewards, seaquest_rewards, method):
+def plot_all_rewards(spaceinvaders_rewards, breakout_rewards, beamrider_rewards, seaquest_rewards, method):
     n_episodes = len(seaquest_rewards)
     x = range(1, n_episodes + 1)
 
@@ -51,9 +51,9 @@ def plot_all_rewards(spaceinvaders_rewards, breakout_rewards, pong_rewards, seaq
     axs[0, 1].set_xlabel('Episode')
     axs[0, 1].set_ylabel('Total Rewards')
 
-    # Plot Pong Rewards
-    axs[1, 0].plot(x, pong_rewards)
-    axs[1, 0].set_title(f"Pong Rewards({method})")
+    # Plot Beam Rider Rewards
+    axs[1, 0].plot(x, beamrider_rewards)
+    axs[1, 0].set_title(f"Beam Rider Rewards({method})")
     axs[1, 0].set_xlabel('Episode')
     axs[1, 0].set_ylabel('Total Rewards')
 
