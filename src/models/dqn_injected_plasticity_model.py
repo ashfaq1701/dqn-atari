@@ -79,34 +79,20 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
                 self.dense1(x) + self.alpha * tf.matmul(x, self.hebb_dense1)
             )
             self.hebb_dense1.assign(
-                self.hebb_dense1 + self.eta * tf.matmul(
-                    tf.transpose(
-                        x - tf.matmul(dense1_op, tf.transpose(self.hebb_dense1))
-                    ),
-                    dense1_op
-                )
+                tf.matmul(tf.transpose(x), dense1_op) * self.eta + self.hebb_dense1 * (1 - self.eta)
             )
 
             state_values_op = (self.state_values(dense1_op)
                                + self.alpha * tf.matmul(dense1_op, self.hebb_state_values))
             self.hebb_state_values.assign(
-                self.hebb_state_values + self.eta * tf.matmul(
-                    tf.transpose(
-                        dense1_op - tf.matmul(state_values_op, tf.transpose(self.hebb_state_values))
-                    ),
-                    state_values_op
-                )
+                tf.matmul(tf.transpose(dense1_op), state_values_op) * self.eta + self.hebb_state_values * (1 - self.eta)
             )
 
             raw_advantages_op = (self.raw_advantages(dense1_op)
                                  + self.alpha * tf.matmul(dense1_op, self.hebb_raw_advantages))
             self.hebb_raw_advantages.assign(
-                self.hebb_raw_advantages + self.eta * tf.matmul(
-                    tf.transpose(
-                        state_values_op - tf.matmul(raw_advantages_op, tf.transpose(self.hebb_raw_advantages))
-                    ),
-                    raw_advantages_op
-                )
+                tf.matmul(tf.transpose(state_values_op), raw_advantages_op) * self.eta
+                + self.hebb_raw_advantages * (1 - self.eta)
             )
 
         advantages = self.advantages(raw_advantages_op)

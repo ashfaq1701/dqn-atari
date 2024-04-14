@@ -99,22 +99,19 @@ def play_multiple_episodes_dqn_inject_plasticity(
         rewards_over_episodes.append(episode_reward)
         steps_over_episodes.append(max_step_of_episode)
 
-        windowed_experiences = shuffle_and_batch_experiences(experiences, batch_size)
+        sampled_experiences = sample_experiences(experiences, batch_size)
 
-        total_avg_max_q_value = 0
-        for experience_window in windowed_experiences:
-            unpacked_experience_window = [np.array(item) for item in zip(*experience_window)]
-            total_avg_max_q_value += training_step(
-                model=model,
-                target_model=target_model,
-                experiences=unpacked_experience_window,
-                discount_factor=discount_factor,
-                optimizer=optimizer,
-                loss_fn=loss_fn,
-                n_outputs=n_outputs
-            )
+        avg_max_q_value = training_step(
+            model=model,
+            target_model=target_model,
+            experiences=sampled_experiences,
+            discount_factor=discount_factor,
+            optimizer=optimizer,
+            loss_fn=loss_fn,
+            n_outputs=n_outputs
+        )
 
-        avg_max_q_values.append(total_avg_max_q_value / len(windowed_experiences))
+        avg_max_q_values.append(avg_max_q_value)
 
     return rewards_over_episodes, rewards_over_episodes, avg_max_q_values
 
@@ -165,20 +162,11 @@ def play_one_episode(episode_idx, env, model, n_steps, n_outputs, history_len, f
             break
 
     total_rewards = sum(episode_rewards)
-    print(f"\rEpisode: {episode_idx + 1}, Steps: {max_step + 1}, eps: 1.000, total rewards: {total_rewards}")
+    print(f"\rEpisode: {episode_idx + 1}, Steps: {max_step + 1}, eps: 0.000, total rewards: {total_rewards}")
     return experiences, total_rewards, max_step
 
 
-def shuffle_and_batch_experiences(experiences, batch_size):
-    indices = list(range(len(experiences)))
-    indices_np = np.array(indices)
-    np.random.shuffle(indices_np)
-
-    windows = []
-    for i in range(0, len(indices_np), batch_size):
-        window = []
-        for j in range(i, min(i + batch_size, len(indices_np))):
-            window.append(experiences[indices_np[j]])
-        windows.append(window)
-
-    return windows
+def sample_experiences(experiences, batch_size):
+    indices = np.random.choice(range(len(experiences)), size=batch_size)
+    sampled_experiences = [experiences[idx] for idx in indices]
+    return [np.array(item) for item in zip(*sampled_experiences)]

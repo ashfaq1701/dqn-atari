@@ -23,7 +23,7 @@ def train_dqn(
         replay_buff_max_len=100_000,
         initial_training_percentage=0.7,
         eta=0.3,
-        alpha=0.3):
+        alpha=0.2):
     env, _, _, action_count = create_env(env_name, env_seed)
 
     loss_fn = tf.keras.losses.mean_squared_error
