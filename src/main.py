@@ -22,8 +22,9 @@ def train_dqn(
         env_seed=None,
         replay_buff_max_len=100_000,
         initial_training_percentage=0.7,
-        eta=0.3,
-        alpha=0.2):
+        eta=0.1,
+        alpha=0.2,
+        plasticity_training_epsilon=0.0):
     env, _, _, action_count = create_env(env_name, env_seed)
 
     loss_fn = tf.keras.losses.mean_squared_error
@@ -95,7 +96,8 @@ def train_dqn(
             loss_fn=loss_fn,
             frame_shape=FRAME_SHAPE,
             initial_training_percentage=initial_training_percentage,
-            replay_buff_max_len=replay_buff_max_len
+            replay_buff_max_len=replay_buff_max_len,
+            plasticity_training_epsilon=plasticity_training_epsilon
         )
     else:
         raise Exception("Unknown method: {}".format(method))

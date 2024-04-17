@@ -21,7 +21,8 @@ def play_multiple_episodes_dqn_plastic(
         loss_fn,
         frame_shape,
         initial_training_percentage,
-        replay_buff_max_len
+        replay_buff_max_len,
+        plasticity_training_epsilon
 ):
     rewards_over_episodes, steps_over_episodes, avg_max_q_values = play_multiple_episodes_dqn(
         env,
@@ -52,6 +53,7 @@ def play_multiple_episodes_dqn_plastic(
         history_len,
         discount_factor,
         batch_size,
+        plasticity_training_epsilon,
         optimizer,
         loss_fn,
         frame_shape,
@@ -74,6 +76,7 @@ def play_multiple_episodes_dqn_inject_plasticity(
         history_len,
         discount_factor,
         batch_size,
+        plasticity_training_epsilon,
         optimizer,
         loss_fn,
         frame_shape,
@@ -81,9 +84,9 @@ def play_multiple_episodes_dqn_inject_plasticity(
         steps_over_episodes_pre_training,
         avg_max_q_value_pre_training
 ):
-    rewards_over_episodes = rewards_over_episodes_pre_training
-    steps_over_episodes = steps_over_episodes_pre_training
-    avg_max_q_values = avg_max_q_value_pre_training
+    rewards_over_episodes = rewards_over_episodes_pre_training[:]
+    steps_over_episodes = steps_over_episodes_pre_training[:]
+    avg_max_q_values = avg_max_q_value_pre_training[:]
 
     for episode in range(start_episode, start_episode + n_episodes):
         experiences, episode_reward, max_step_of_episode = play_one_episode(
@@ -93,7 +96,8 @@ def play_multiple_episodes_dqn_inject_plasticity(
             n_steps=n_steps,
             n_outputs=n_outputs,
             history_len=history_len,
-            frame_shape=frame_shape
+            frame_shape=frame_shape,
+            plasticity_training_epsilon=plasticity_training_epsilon
         )
 
         rewards_over_episodes.append(episode_reward)
@@ -116,9 +120,9 @@ def play_multiple_episodes_dqn_inject_plasticity(
     return rewards_over_episodes, rewards_over_episodes, avg_max_q_values
 
 
-def play_one_step(env, state_queue, model, n_outputs, frame_shape):
+def play_one_step(env, state_queue, model, n_outputs, frame_shape, plasticity_training_epsilon):
     state_history = state_queue.get_history()
-    action = epsilon_greedy_policy(state_history, model, n_outputs, 0.0)
+    action = epsilon_greedy_policy(state_history, model, n_outputs, plasticity_training_epsilon)
     next_state, reward, done, truncated, info = env.step(action)
     preprocessed_next_state = frame_processor(next_state, shape=frame_shape)
     state_queue.enqueue(preprocessed_next_state)
@@ -126,7 +130,16 @@ def play_one_step(env, state_queue, model, n_outputs, frame_shape):
     return state_history, action, reward, done, next_state_history, truncated
 
 
-def play_one_episode(episode_idx, env, model, n_steps, n_outputs, history_len, frame_shape):
+def play_one_episode(
+        episode_idx,
+        env,
+        model,
+        n_steps,
+        n_outputs,
+        history_len,
+        frame_shape,
+        plasticity_training_epsilon
+):
     obs, info = env.reset()
 
     state_queue = MaxSizedQueue(history_len=history_len)
@@ -143,7 +156,8 @@ def play_one_episode(episode_idx, env, model, n_steps, n_outputs, history_len, f
             state_queue,
             model,
             n_outputs,
-            frame_shape
+            frame_shape,
+            plasticity_training_epsilon
         )
 
         max_step = step
@@ -162,7 +176,7 @@ def play_one_episode(episode_idx, env, model, n_steps, n_outputs, history_len, f
             break
 
     total_rewards = sum(episode_rewards)
-    print(f"\rEpisode: {episode_idx + 1}, Steps: {max_step + 1}, eps: 0.000, total rewards: {total_rewards}")
+    print(f"\rEpisode: {episode_idx + 1}, Steps: {max_step + 1}, eps: {plasticity_training_epsilon:.3f}, total rewards: {total_rewards}")
     return experiences, total_rewards, max_step
 
 
