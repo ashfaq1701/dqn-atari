@@ -34,14 +34,14 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
             self.hebb_dense1 = self.add_weight(
                 shape=(3136, 512),
                 initializer=tf.zeros_initializer(),
-                trainable=True,
+                trainable=False,
                 name="hebb_dense1"
             )
         else:
             self.hebb_dense1 = self.add_weight(
                 shape=(3136, 512),
                 initializer=tf.constant_initializer(hebb_dense1),
-                trainable=True,
+                trainable=False,
                 name="hebb_dense1"
             )
 
@@ -49,14 +49,14 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
             self.hebb_state_values = self.add_weight(
                 shape=(512, 1),
                 initializer=tf.zeros_initializer(),
-                trainable=True,
+                trainable=False,
                 name="hebb_state_values"
             )
         else:
             self.hebb_state_values = self.add_weight(
                 shape=(512, 1),
                 initializer=tf.constant_initializer(hebb_state_values),
-                trainable=True,
+                trainable=False,
                 name="hebb_dense1"
             )
 
@@ -64,14 +64,14 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
             self.hebb_raw_advantages = self.add_weight(
                 shape=(512, num_classes),
                 initializer=tf.zeros_initializer(),
-                trainable=True,
+                trainable=False,
                 name="hebb_raw_advantages"
             )
         else:
             self.hebb_raw_advantages = self.add_weight(
                 shape=(512, num_classes),
                 initializer=tf.constant_initializer(hebb_raw_advantages),
-                trainable=True,
+                trainable=False,
                 name="hebb_dense1"
             )
 
@@ -181,5 +181,3 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
             hebb_raw_advantages=np.array(config['hebb_raw_advantages'])
             if config['hebb_raw_advantages'] is not None else None
         )
-
-
