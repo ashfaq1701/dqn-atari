@@ -30,6 +30,7 @@ def play_multiple_episodes_dqn(
     steps_over_episodes = []
     max_reward = float('-inf')
     best_weights = model.get_weights()
+    losses = []
     avg_max_q_values = []
 
     for episode in range(n_episodes):
@@ -55,9 +56,11 @@ def play_multiple_episodes_dqn(
             max_reward = episode_reward
 
         avg_max_q_value = 0
+        loss = 0
+
         if episode >= 50:
             experiences = replay_buffer.sample_experiences()
-            avg_max_q_value = training_step(
+            loss, avg_max_q_value = training_step(
                 model=model,
                 target_model=target_model,
                 experiences=experiences,
@@ -70,10 +73,11 @@ def play_multiple_episodes_dqn(
             if episode % 50 == 0:
                 target_model.set_weights(model.get_weights())
 
+        losses.append(loss)
         avg_max_q_values.append(avg_max_q_value)
 
     model.set_weights(best_weights)
-    return rewards_over_episodes, steps_over_episodes, avg_max_q_values
+    return rewards_over_episodes, steps_over_episodes, avg_max_q_values, losses
 
 
 def play_one_step(env, state_queue, model, n_outputs, replay_buffer, step_idx, epsilon, frame_shape):

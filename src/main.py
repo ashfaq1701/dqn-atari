@@ -22,14 +22,14 @@ def train_dqn(
         env_seed=None,
         replay_buff_max_len=100_000,
         initial_training_percentage=0.7,
-        eta=0.1,
+        eta=1e-3,
         alpha=0.2,
-        plasticity_training_epsilon=0.0):
+        plasticity_training_epsilon=0.0,
+        loss_fn=tf.keras.losses.mean_squared_error):
+
     env, _, _, action_count = create_env(env_name, env_seed)
 
-    loss_fn = tf.keras.losses.mean_squared_error
     optimizer = tf.keras.optimizers.Nadam(learning_rate=learning_rate)
-
     keras.config.enable_unsafe_deserialization()
 
     if method == 'dqn':
@@ -66,7 +66,7 @@ def train_dqn(
     target_model.set_weights(model.get_weights())
 
     if method == 'dqn' or method == 'ddqn':
-        rewards_per_episode, steps_over_episode, q_values_over_episode = play_multiple_episodes_dqn(
+        rewards_per_episode, steps_over_episode, q_values_over_episode, losses = play_multiple_episodes_dqn(
             env=env,
             model=model,
             target_model=model,
@@ -82,7 +82,7 @@ def train_dqn(
             replay_buff_max_len=replay_buff_max_len
         )
     elif method == 'ddqn_injected_plasticity':
-        rewards_per_episode, steps_over_episode, q_values_over_episode = play_multiple_episodes_dqn_plastic(
+        rewards_per_episode, steps_over_episode, q_values_over_episode, losses = play_multiple_episodes_dqn_plastic(
             env=env,
             model=model,
             target_model=model,
@@ -102,4 +102,4 @@ def train_dqn(
     else:
         raise Exception("Unknown method: {}".format(method))
 
-    return rewards_per_episode, steps_over_episode, q_values_over_episode, model
+    return rewards_per_episode, steps_over_episode, q_values_over_episode, losses, model

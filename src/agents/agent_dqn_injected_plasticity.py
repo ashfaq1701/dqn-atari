@@ -24,7 +24,7 @@ def play_multiple_episodes_dqn_plastic(
         replay_buff_max_len,
         plasticity_training_epsilon
 ):
-    rewards_over_episodes, steps_over_episodes, avg_max_q_values = play_multiple_episodes_dqn(
+    rewards_over_episodes, steps_over_episodes, avg_max_q_values, losses = play_multiple_episodes_dqn(
         env,
         model,
         target_model,
@@ -42,7 +42,7 @@ def play_multiple_episodes_dqn_plastic(
 
     model.inject_plasticity()
 
-    rewards_over_episodes, steps_over_episodes, avg_max_q_values = play_multiple_episodes_dqn_inject_plasticity(
+    rewards_over_episodes, steps_over_episodes, avg_max_q_values, losses = play_multiple_episodes_dqn_inject_plasticity(
         env,
         model,
         target_model,
@@ -59,10 +59,11 @@ def play_multiple_episodes_dqn_plastic(
         frame_shape,
         rewards_over_episodes,
         steps_over_episodes,
-        avg_max_q_values
+        avg_max_q_values,
+        losses
     )
 
-    return rewards_over_episodes, steps_over_episodes, avg_max_q_values
+    return rewards_over_episodes, steps_over_episodes, avg_max_q_values, losses
 
 
 def play_multiple_episodes_dqn_inject_plasticity(
@@ -82,11 +83,13 @@ def play_multiple_episodes_dqn_inject_plasticity(
         frame_shape,
         rewards_over_episodes_pre_training,
         steps_over_episodes_pre_training,
-        avg_max_q_value_pre_training
+        avg_max_q_value_pre_training,
+        losses_pre_training
 ):
     rewards_over_episodes = rewards_over_episodes_pre_training[:]
     steps_over_episodes = steps_over_episodes_pre_training[:]
     avg_max_q_values = avg_max_q_value_pre_training[:]
+    losses = losses_pre_training[:]
 
     for episode in range(start_episode, start_episode + n_episodes):
         experiences, episode_reward, max_step_of_episode = play_one_episode(
@@ -105,7 +108,7 @@ def play_multiple_episodes_dqn_inject_plasticity(
 
         sampled_experiences = sample_experiences(experiences, batch_size)
 
-        avg_max_q_value = training_step(
+        loss, avg_max_q_value = training_step(
             model=model,
             target_model=target_model,
             experiences=sampled_experiences,
@@ -116,8 +119,9 @@ def play_multiple_episodes_dqn_inject_plasticity(
         )
 
         avg_max_q_values.append(avg_max_q_value)
+        losses.append(loss)
 
-    return rewards_over_episodes, rewards_over_episodes, avg_max_q_values
+    return rewards_over_episodes, rewards_over_episodes, avg_max_q_values, losses
 
 
 def play_one_step(env, state_queue, model, n_outputs, frame_shape, plasticity_training_epsilon):

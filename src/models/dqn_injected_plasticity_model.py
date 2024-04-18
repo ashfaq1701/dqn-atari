@@ -1,3 +1,4 @@
+import numpy as np
 import tensorflow as tf
 from src.models.layers.max_norm import MaxNorm
 
@@ -30,19 +31,49 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
         self.is_plasticity_injected = is_plasticity_injected
 
         if hebb_dense1 is None:
-            self.hebb_dense1 = tf.Variable(tf.zeros(shape=(3136, 512)), trainable=False)
+            self.hebb_dense1 = self.add_weight(
+                shape=(3136, 512),
+                initializer=tf.zeros_initializer(),
+                trainable=True,
+                name="hebb_dense1"
+            )
         else:
-            self.hebb_dense1 = hebb_dense1
+            self.hebb_dense1 = self.add_weight(
+                shape=(3136, 512),
+                initializer=tf.constant_initializer(hebb_dense1),
+                trainable=True,
+                name="hebb_dense1"
+            )
 
         if hebb_state_values is None:
-            self.hebb_state_values = tf.Variable(tf.zeros(shape=(512, 1)), trainable=False)
+            self.hebb_state_values = self.add_weight(
+                shape=(512, 1),
+                initializer=tf.zeros_initializer(),
+                trainable=True,
+                name="hebb_state_values"
+            )
         else:
-            self.hebb_state_values = hebb_state_values
+            self.hebb_state_values = self.add_weight(
+                shape=(512, 1),
+                initializer=tf.constant_initializer(hebb_state_values),
+                trainable=True,
+                name="hebb_dense1"
+            )
 
         if hebb_raw_advantages is None:
-            self.hebb_raw_advantages = tf.Variable(tf.zeros(shape=(512, num_classes)), trainable=False)
+            self.hebb_raw_advantages = self.add_weight(
+                shape=(512, num_classes),
+                initializer=tf.zeros_initializer(),
+                trainable=True,
+                name="hebb_raw_advantages"
+            )
         else:
-            self.hebb_raw_advantages = hebb_raw_advantages
+            self.hebb_raw_advantages = self.add_weight(
+                shape=(512, num_classes),
+                initializer=tf.constant_initializer(hebb_raw_advantages),
+                trainable=True,
+                name="hebb_dense1"
+            )
 
         self.conv1 = tf.keras.layers.Conv2D(
             filters=32,
@@ -115,6 +146,10 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
         self.advantages.trainable = False
         self.q_values.trainable = False
 
+        self.hebb_dense1.trainable = True
+        self.hebb_state_values.trainable = True
+        self.hebb_raw_advantages.trainable = True
+
     def get_config(self):
         config = super().get_config()
         config.update({
@@ -139,13 +174,12 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
             eta=config['eta'],
             alpha=config['alpha'],
             is_plasticity_injected=config['is_plasticity_injected'],
-            hebb_dense1=tf.constant(config['hebb_dense1'] if config['hebb_dense1'] is not None else None),
-            hebb_state_values=tf.constant(
-                config['hebb_state_values'] if config['hebb_state_values'] is not None else None
-            ),
-            hebb_raw_advantages=tf.constant(
-                config['hebb_raw_advantages'] if config['hebb_raw_advantages'] is not None else None
-            )
+            hebb_dense1=np.array(config['hebb_dense1'])
+            if config['hebb_dense1'] is not None else None,
+            hebb_state_values=np.array(config['hebb_state_values'])
+            if config['hebb_state_values'] is not None else None,
+            hebb_raw_advantages=np.array(config['hebb_raw_advantages'])
+            if config['hebb_raw_advantages'] is not None else None
         )
 
 
