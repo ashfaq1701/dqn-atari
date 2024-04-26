@@ -2,7 +2,7 @@ import matplotlib
 import numpy as np
 import tensorflow as tf
 from matplotlib import pyplot as plt
-
+from matplotlib.animation import FuncAnimation
 from src.data.queue import MaxSizedQueue
 from src.env import create_env
 from src.preprocess import frame_processor
@@ -23,7 +23,7 @@ def simulate_playing_game(model_path, env_name, env_seed=None, history_len=4, ma
 
     total_rewards = 0
 
-    for _ in range(max_steps):
+    for step in range(max_steps):
         state_history = state_queue.get_history()
         Q_values = model.predict(state_history[np.newaxis], verbose=0)[0]
         action = Q_values.argmax()
@@ -35,6 +35,8 @@ def simulate_playing_game(model_path, env_name, env_seed=None, history_len=4, ma
         total_rewards += reward
 
         frames.append(next_state)
+        if step == 250:
+            plt.imsave('../data/outputs/game_frame_result.png', next_state)
 
         if done or truncated:
             break
@@ -52,7 +54,7 @@ def plot_animation(frames, repeat=False, interval=40):
     fig = plt.figure()
     patch = plt.imshow(frames[0])
     plt.axis('off')
-    anim = matplotlib.animation.FuncAnimation(
+    anim = FuncAnimation(
         fig,
         update_scene,
         fargs=(frames, patch),

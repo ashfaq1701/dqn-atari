@@ -20,7 +20,8 @@ def play_multiple_episodes_dqn(
         optimizer,
         loss_fn,
         frame_shape,
-        replay_buff_max_len):
+        replay_buff_max_len,
+        restore_best_weights):
     replay_buffer = ReplayBuffer(
         history_len=history_len,
         batch_size=batch_size,
@@ -76,7 +77,8 @@ def play_multiple_episodes_dqn(
         losses.append(loss)
         avg_max_q_values.append(avg_max_q_value)
 
-    model.set_weights(best_weights)
+    if restore_best_weights:
+        model.set_weights(best_weights)
     return rewards_over_episodes, steps_over_episodes, avg_max_q_values, losses
 
 

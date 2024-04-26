@@ -22,7 +22,8 @@ def play_multiple_episodes_dqn_plastic(
         frame_shape,
         initial_training_percentage,
         replay_buff_max_len,
-        plasticity_training_epsilon
+        plasticity_training_epsilon,
+        restore_best_weights
 ):
     rewards_over_episodes, steps_over_episodes, avg_max_q_values, losses = play_multiple_episodes_dqn(
         env,
@@ -37,7 +38,8 @@ def play_multiple_episodes_dqn_plastic(
         optimizer,
         loss_fn,
         frame_shape,
-        replay_buff_max_len
+        replay_buff_max_len,
+        restore_best_weights
     )
 
     model.inject_plasticity()
@@ -117,6 +119,9 @@ def play_multiple_episodes_dqn_inject_plasticity(
             loss_fn=loss_fn,
             n_outputs=n_outputs
         )
+
+        if episode % 50 == 0:
+            target_model.set_weights(model.get_weights())
 
         avg_max_q_values.append(avg_max_q_value)
         losses.append(loss)

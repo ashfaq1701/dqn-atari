@@ -13,6 +13,8 @@ ale-py = "*"
 opencv-python = "*"
 tensorflow-macos = "*"
 tensorflow-metal = "*"
+pydot = "*"
+ffmpeg-python = "*"
 
 [dev-packages]
 

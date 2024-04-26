@@ -34,14 +34,14 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
             self.hebb_dense1 = self.add_weight(
                 shape=(3136, 512),
                 initializer=tf.zeros_initializer(),
-                trainable=False,
+                trainable=True,
                 name="hebb_dense1"
             )
         else:
             self.hebb_dense1 = self.add_weight(
                 shape=(3136, 512),
                 initializer=tf.constant_initializer(hebb_dense1),
-                trainable=False,
+                trainable=True,
                 name="hebb_dense1"
             )
 
@@ -49,14 +49,14 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
             self.hebb_state_values = self.add_weight(
                 shape=(512, 1),
                 initializer=tf.zeros_initializer(),
-                trainable=False,
+                trainable=True,
                 name="hebb_state_values"
             )
         else:
             self.hebb_state_values = self.add_weight(
                 shape=(512, 1),
                 initializer=tf.constant_initializer(hebb_state_values),
-                trainable=False,
+                trainable=True,
                 name="hebb_dense1"
             )
 
@@ -64,17 +64,18 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
             self.hebb_raw_advantages = self.add_weight(
                 shape=(512, num_classes),
                 initializer=tf.zeros_initializer(),
-                trainable=False,
+                trainable=True,
                 name="hebb_raw_advantages"
             )
         else:
             self.hebb_raw_advantages = self.add_weight(
                 shape=(512, num_classes),
                 initializer=tf.constant_initializer(hebb_raw_advantages),
-                trainable=False,
+                trainable=True,
                 name="hebb_dense1"
             )
 
+        self.rescaling = tf.keras.layers.Rescaling(1. / 255)
         self.conv1 = tf.keras.layers.Conv2D(
             filters=32,
             kernel_size=8,
@@ -96,7 +97,8 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
             self.inject_plasticity()
 
     def call(self, inputs):
-        x = self.conv1(inputs)
+        x = self.rescaling(inputs)
+        x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)
         x = self.flatten(x)
@@ -146,6 +148,8 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
         self.advantages.trainable = False
         self.q_values.trainable = False
 
+        self._reinitialize_hebb_tensors()
+
         self.hebb_dense1.trainable = True
         self.hebb_state_values.trainable = True
         self.hebb_raw_advantages.trainable = True
@@ -181,3 +185,8 @@ class DDQNInjectedPlasticityModel(tf.keras.Model):
             hebb_raw_advantages=np.array(config['hebb_raw_advantages'])
             if config['hebb_raw_advantages'] is not None else None
         )
+
+    def _reinitialize_hebb_tensors(self):
+        self.hebb_dense1.assign(tf.zeros(shape=self.hebb_dense1.shape))
+        self.hebb_state_values.assign(tf.zeros(shape=self.hebb_state_values.shape))
+        self.hebb_raw_advantages.assign(tf.zeros(shape=self.hebb_raw_advantages.shape))
